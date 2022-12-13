@@ -1,23 +1,129 @@
-$( "#header-plugin" ).load( "https://vivinantony.github.io/header-plugin/", function() {
-	$("a.back-to-link").attr("href", "http://blog.thelittletechie.com/2015/03/love-heart-animation-using-css3.html#tlt")  
+$(document).ready(function(){
+
+  initLetItSnow();
 });
 
-var love = setInterval(function() {
-    var r_num = Math.floor(Math.random() * 40) + 1;
-    var r_size = Math.floor(Math.random() * 65) + 10;
-    var r_left = Math.floor(Math.random() * 100) + 1;
-    var r_bg = Math.floor(Math.random() * 25) + 100;
-    var r_time = Math.floor(Math.random() * 5) + 5;
+// Init Christmas! \o/
+var initLetItSnow = function(){
 
-    $('.bg_heart').append("<div class='heart' style='width:" + r_size + "px;height:" + r_size + "px;left:" + r_left + "%;background:rgba(255," + (r_bg - 25) + "," + r_bg + ",1);-webkit-animation:love " + r_time + "s ease;-moz-animation:love " + r_time + "s ease;-ms-animation:love " + r_time + "s ease;animation:love " + r_time + "s ease'></div>");
+	(function() {
+	    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame ||
+	    function(callback) {
+	        window.setTimeout(callback, 1000 / 60);
+	    };
+	    window.requestAnimationFrame = requestAnimationFrame;
+	})();
 
-    $('.bg_heart').append("<div class='heart' style='width:" + (r_size - 10) + "px;height:" + (r_size - 10) + "px;left:" + (r_left + r_num) + "%;background:rgba(255," + (r_bg - 25) + "," + (r_bg + 25) + ",1);-webkit-animation:love " + (r_time + 5) + "s ease;-moz-animation:love " + (r_time + 5) + "s ease;-ms-animation:love " + (r_time + 5) + "s ease;animation:love " + (r_time + 5) + "s ease'></div>");
+	var flakes = [],
+	    canvas = document.getElementById("xmas"),
+	    ctx = canvas.getContext("2d"),
+	    mX = -100,
+	    mY = -100;
 
-    $('.heart').each(function() {
-        var top = $(this).css("top").replace(/[^-\d\.]/g, '');
-        var width = $(this).css("width").replace(/[^-\d\.]/g, '');
-        if (top <= -100 || width >= 150) {
-            $(this).detach();
-        }
-    });
-}, 500);
+	    if( $(window).width() < 999 ){
+	    	var flakeCount = 125;
+	    } else {
+	    	var flakeCount = 450;
+	    }
+
+	    canvas.width = window.innerWidth;
+	    canvas.height = window.innerHeight;
+
+	function snow() {
+	    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	    for (var i = 0; i < flakeCount; i++) {
+	        var flake = flakes[i],
+	            x = mX,
+	            y = mY,
+	            minDist = 250,
+	            x2 = flake.x,
+	            y2 = flake.y;
+
+	        var dist = Math.sqrt((x2 - x) * (x2 - x) + (y2 - y) * (y2 - y)),
+	            dx = x2 - x,
+	            dy = y2 - y;
+
+	        if (dist < minDist) {
+	            var force = minDist / (dist * dist),
+	                xcomp = (x - x2) / dist,
+	                ycomp = (y - y2) / dist,
+	                // deltaV = force / 2;
+	                deltaV = force;
+
+	            flake.velX -= deltaV * xcomp;
+	            flake.velY -= deltaV * ycomp;
+
+	        } else {
+	            flake.velX *= .98;
+	            if (flake.velY <= flake.speed) {
+	                flake.velY = flake.speed
+	            }
+	            flake.velX += Math.cos(flake.step += .05) * flake.stepSize;
+	        }
+
+	        ctx.fillStyle = "rgba(255,255,255," + flake.opacity + ")";
+	        flake.y += flake.velY;
+	        flake.x += flake.velX;
+	            
+	        if (flake.y >= canvas.height || flake.y <= 0) {
+	            reset(flake);
+	        }
+
+	        if (flake.x >= canvas.width || flake.x <= 0) {
+	            reset(flake);
+	        }
+
+	        ctx.beginPath();
+	        ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+	        ctx.fill();
+	    }
+	    requestAnimationFrame(snow);
+	};
+
+	function reset(flake) {
+	    flake.x = Math.floor(Math.random() * canvas.width);
+	    flake.y = 0;
+	    flake.size = (Math.random() * 3) + 2;
+	    flake.speed = (Math.random() * 1) + 0.5;
+	    flake.velY = flake.speed;
+	    flake.velX = 0;
+	    flake.opacity = (Math.random() * 0.5) + 0.3;
+	}
+
+	function init() {
+	    for (var i = 0; i < flakeCount; i++) {
+	        var x = Math.floor(Math.random() * canvas.width),
+	            y = Math.floor(Math.random() * canvas.height),
+	            size = (Math.random() * 3) + 4,
+	            speed = (Math.random() * 1) + 0.5,
+	            opacity = (Math.random() * 0.5) + 0.3;
+
+	        flakes.push({
+	            speed: speed,
+	            velY: speed,
+	            velX: 0,
+	            x: x,
+	            y: y,
+	            size: size,
+	            stepSize: (Math.random()) / 160,
+	            step: 0,
+	            opacity: opacity
+	        });
+	    }
+
+	    snow();
+	};
+
+	canvas.addEventListener("mousemove", function(e) {
+	    mX = e.clientX,
+	    mY = e.clientY
+	});
+
+	window.addEventListener("resize",function(){
+	    canvas.width = window.innerWidth;
+	    canvas.height = window.innerHeight;
+	})
+
+	init();
+};
